@@ -52,7 +52,16 @@ func main() {
     }
 	fmt.Println("Product retrieved successfully")
 	fmt.Println(product.ID)
+
+
+	resp , err := selectAllProducts(db)
+	if err!= nil {
+        panic(err)
+    }
+	fmt.Println(resp)
 }
+
+
 
 
 func insertProduct(db *sql.DB,  product *Product) error{
@@ -99,4 +108,25 @@ func selectProduct(db *sql.DB, id string) (*Product, error) {
     }
     return &product, nil
 
+}
+
+func selectAllProducts(db *sql.DB) ([]Product, error) {
+	rows, err := db.Query("SELECT * FROM products")
+	if err!= nil {
+        return nil, err
+    }
+
+	defer rows.Close()
+
+	var products []Product
+	for rows.Next() {
+		var product Product
+        err = rows.Scan(&product.ID, &product.Name, &product.Price)
+        if err!= nil {
+            return nil, err
+        }
+        products = append(products, product)
+	}
+	return products, nil
+	
 }
